@@ -127,107 +127,126 @@
         <div class="amb-zone" id="ambZone"></div>
       </div>
 
-      <!-- UI Карусель -->
-      <div class="ui-carousel-wrapper">
-        <div class="ui-carousel" id="uiCarousel">
-          
-          <!-- Слайд 1: Switches -->
-          <div class="ui-slide" data-slide="0">
-            <div class="slide-header">
-              <h3>SWITCHES</h3>
-              <p class="slide-instruction">tap to toggle</p>
-            </div>
-            <div class="slide-content">
-              <div class="ui-element">
-                <label class="switch">
-                  <input type="checkbox" class="ui-sound-trigger" data-sound="switch">
-                  <span class="slider">
-                    <span class="switch-text on">ON</span>
-                    <span class="switch-text off">OFF</span>
-                  </span>
-                </label>
-                <p class="ui-label">Toggle 1</p>
-              </div>
-              <div class="ui-element">
-                <label class="switch">
-                  <input type="checkbox" class="ui-sound-trigger" data-sound="switch">
-                  <span class="slider">
-                    <span class="switch-text on">ON</span>
-                    <span class="switch-text off">OFF</span>
-                  </span>
-                </label>
-                <p class="ui-label">Toggle 2</p>
-              </div>
-              <div class="ui-element">
-                <label class="switch">
-                  <input type="checkbox" class="ui-sound-trigger" data-sound="switch">
-                  <span class="slider">
-                    <span class="switch-text on">ON</span>
-                    <span class="switch-text off">OFF</span>
-                  </span>
-                </label>
-                <p class="ui-label">Toggle 3</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Слайд 2: Buttons -->
-          <div class="ui-slide" data-slide="1">
-            <div class="slide-header">
-              <h3>BUTTONS</h3>
-              <p class="slide-instruction">tap and enjoy</p>
-            </div>
-            <div class="slide-content">
-              <div class="ui-element">
-                <button class="custom-button ui-sound-trigger" data-sound="button">
-                  <span>Press</span>
-                </button>
-                <p class="ui-label">Button 1</p>
-              </div>
-              <div class="ui-element">
-                <button class="custom-button ui-sound-trigger" data-sound="button">
-                  <span>Click</span>
-                </button>
-                <p class="ui-label">Button 2</p>
-              </div>
-              <div class="ui-element">
-                <button class="custom-button ui-sound-trigger" data-sound="button">
-                  <span>Tap</span>
-                </button>
-                <p class="ui-label">Button 3</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Слайд 3: Progress Bar -->
-          <div class="ui-slide" data-slide="2">
-            <div class="slide-header">
-              <h3>PROGRESS BAR</h3>
-              <p class="slide-instruction">click to fill</p>
-            </div>
-            <div class="slide-content">
-              <div class="ui-element">
-                <div class="progress-bar-container" id="progressBar" data-duration="3000">
-                  <div class="progress-bar-fill" id="progressBarFill"></div>
-                  <div class="progress-bar-text" id="progressBarText">0%</div>
-                </div>
-                <p class="ui-label">Progress 3s</p>
-              </div>
-            </div>
-          </div>
-
+      <!-- Блок SWITCHES -->
+      <div class="ui-section" data-section="switches">
+        <div class="section-header">
+          <h3>SWITCHES</h3>
+          <p class="section-instruction">swipe to explore variants</p>
         </div>
-
-        <!-- Индикаторы -->
-        <div class="carousel-indicators" id="carouselIndicators">
-          <button class="indicator active" data-index="0"></button>
-          <button class="indicator" data-index="1"></button>
-          <button class="indicator" data-index="2"></button>
+        <div class="section-carousel" data-section-id="switches">
+          <div class="carousel-slide" data-index="0">
+            <div class="ui-element">
+              <label class="switch">
+                <input type="checkbox" class="ui-sound-trigger" data-sound="switch">
+                <span class="slider">
+                  <span class="switch-text on">ON</span>
+                  <span class="switch-text off">OFF</span>
+                </span>
+              </label>
+              <p class="ui-label">Toggle Switch</p>
+            </div>
+          </div>
+          <div class="carousel-slide" data-index="1">
+            <div class="ui-element">
+              <label class="switch">
+                <input type="checkbox" class="ui-sound-trigger" data-sound="switch">
+                <span class="slider">
+                  <span class="switch-text on">ON</span>
+                  <span class="switch-text off">OFF</span>
+                </span>
+              </label>
+              <p class="ui-label">Toggle Switch 2</p>
+            </div>
+          </div>
+          <div class="carousel-slide" data-index="2">
+            <div class="ui-element">
+              <label class="switch">
+                <input type="checkbox" class="ui-sound-trigger" data-sound="switch">
+                <span class="slider">
+                  <span class="switch-text on">ON</span>
+                  <span class="switch-text off">OFF</span>
+                </span>
+              </label>
+              <p class="ui-label">Toggle Switch 3</p>
+            </div>
+          </div>
         </div>
-
-        <!-- Счетчик -->
-        <div class="carousel-counter" id="carouselCounter">1 / 3</div>
+        <div class="section-counter" data-counter="switches">1 / 3</div>
       </div>
+
+      <!-- Блок BUTTONS -->
+      <div class="ui-section" data-section="buttons">
+        <div class="section-header">
+          <h3>BUTTONS</h3>
+          <p class="section-instruction">swipe to explore variants</p>
+        </div>
+        <div class="section-carousel" data-section-id="buttons">
+          <div class="carousel-slide" data-index="0">
+            <div class="ui-element">
+              <button class="custom-button ui-sound-trigger" data-sound="button">
+                <span>Press</span>
+              </button>
+              <p class="ui-label">Press Button</p>
+            </div>
+          </div>
+          <div class="carousel-slide" data-index="1">
+            <div class="ui-element">
+              <button class="custom-button ui-sound-trigger" data-sound="button">
+                <span>Click</span>
+              </button>
+              <p class="ui-label">Click Button</p>
+            </div>
+          </div>
+          <div class="carousel-slide" data-index="2">
+            <div class="ui-element">
+              <button class="custom-button ui-sound-trigger" data-sound="button">
+                <span>Tap</span>
+              </button>
+              <p class="ui-label">Tap Button</p>
+            </div>
+          </div>
+        </div>
+        <div class="section-counter" data-counter="buttons">1 / 3</div>
+      </div>
+
+      <!-- Блок PROGRESS BAR -->
+      <div class="ui-section" data-section="progress">
+        <div class="section-header">
+          <h3>PROGRESS BAR</h3>
+          <p class="section-instruction">swipe to explore variants</p>
+        </div>
+        <div class="section-carousel" data-section-id="progress">
+          <div class="carousel-slide" data-index="0">
+            <div class="ui-element">
+              <div class="progress-bar-container" data-duration="3000">
+                <div class="progress-bar-fill"></div>
+                <div class="progress-bar-text">0%</div>
+              </div>
+              <p class="ui-label">Progress 3s</p>
+            </div>
+          </div>
+          <div class="carousel-slide" data-index="1">
+            <div class="ui-element">
+              <div class="progress-bar-container" data-duration="2000">
+                <div class="progress-bar-fill"></div>
+                <div class="progress-bar-text">0%</div>
+              </div>
+              <p class="ui-label">Progress 2s</p>
+            </div>
+          </div>
+          <div class="carousel-slide" data-index="2">
+            <div class="ui-element">
+              <div class="progress-bar-container" data-duration="5000">
+                <div class="progress-bar-fill"></div>
+                <div class="progress-bar-text">0%</div>
+              </div>
+              <p class="ui-label">Progress 5s</p>
+            </div>
+          </div>
+        </div>
+        <div class="section-counter" data-counter="progress">1 / 3</div>
+      </div>
+
     </div>
   </section>
 

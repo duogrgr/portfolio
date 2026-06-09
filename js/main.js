@@ -76,17 +76,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // ===== PROGRESS BAR (ПЕРЕЗАПУСК ПРИ КЛИКЕ) =====
-  const progressBar = document.getElementById('progressBar');
-  const progressBarFill = document.getElementById('progressBarFill');
-  const progressBarText = document.getElementById('progressBarText');
-
-  if (progressBar && progressBarFill && progressBarText) {
+  // ===== UI СЕКЦИИ (НЕЗАВИСИМЫЕ КАРУСЕЛИ) =====
+  const uiSections = document.querySelectorAll('.ui-section');
+  
+  uiSections.forEach(section => {
+    const carousel = section.querySelector('.section-carousel');
+    const counter = section.querySelector('.section-counter');
+    const sectionId = section.getAttribute('data-section');
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+    
+    // Функция обновления счетчика
+    function updateCounter(index) {
+      counter.textContent = `${index + 1} / ${totalSlides}`;
+    }
+    
+    // Отслеживание скролла для обновления счетчика
+    let scrollTimeout;
+    carousel.addEventListener('scroll', () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const scrollLeft = carousel.scrollLeft;
+        const slideWidth = carousel.offsetWidth;
+        const newIndex = Math.round(scrollLeft / slideWidth);
+        
+        if (newIndex !== currentSlide && newIndex >= 0 && newIndex < totalSlides) {
+          currentSlide = newIndex;
+          updateCounter(currentSlide);
+        }
+      }, 100);
+    });
+    
+    // Клавиатурная навигация для активного блока
+    carousel.setAttribute('tabindex', '0');
+    carousel.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          slides[currentSlide].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+          updateCounter(currentSlide);
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (currentSlide > 0) {
+          currentSlide--;
+          slides[currentSlide].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+          updateCounter(currentSlide);
+        }
+      }
+    });
+    
+    // Инициализация
+    updateCounter(0);
+  });
+  
+  // ===== PROGRESS BAR =====
+  const progressBars = document.querySelectorAll('.progress-bar-container');
+  
+  progressBars.forEach(progressBar => {
+    const fill = progressBar.querySelector('.progress-bar-fill');
+    const text = progressBar.querySelector('.progress-bar-text');
     let animationFrameId = null;
 
     function animateProgress(duration) {
-      progressBarFill.style.width = '0%';
-      progressBarText.textContent = '0%';
+      fill.style.width = '0%';
+      text.textContent = '0%';
       
       const startTime = performance.now();
       
@@ -95,13 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const progress = Math.min(elapsed / duration, 1);
         const percentage = Math.round(progress * 100);
         
-        progressBarFill.style.width = `${percentage}%`;
-        progressBarText.textContent = `${percentage}%`;
+        fill.style.width = `${percentage}%`;
+        text.textContent = `${percentage}%`;
         
         if (progress < 1) {
           animationFrameId = requestAnimationFrame(update);
-        } else {
-          console.log('Progress bar animation complete');
         }
       }
       
@@ -121,105 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const duration = parseInt(progressBar.getAttribute('data-duration')) || 3000;
       animateProgress(duration);
     });
-  }
-  
-  // ===== UI КАРУСЕЛЬ С GSAP =====
-  const uiCarousel = document.getElementById('uiCarousel');
-  const indicators = document.querySelectorAll('.indicator');
-  const counter = document.getElementById('carouselCounter');
-  const totalSlides = document.querySelectorAll('.ui-slide').length;
-  let currentSlide = 0;
-  let isAnimating = false;
-
-  function goToSlide(index) {
-    if (isAnimating) return;
-    isAnimating = true;
-    
-    if (index < 0) index = totalSlides - 1;
-    if (index >= totalSlides) index = 0;
-    
-    currentSlide = index;
-    
-    const slide = document.querySelector(`[data-slide="${index}"]`);
-    if (slide) {
-      slide.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-    }
-    
-    indicators.forEach((ind, i) => {
-      ind.classList.toggle('active', i === index);
-    });
-    
-    counter.textContent = `${index + 1} / ${totalSlides}`;
-    
-    animateSlideContent(slide);
-    
-    setTimeout(() => {
-      isAnimating = false;
-    }, 500);
-  }
-
-  function animateSlideContent(slide) {
-    if (!slide || typeof gsap === 'undefined') return;
-    
-    const elements = slide.querySelectorAll('.ui-element');
-    
-    gsap.set(elements, { 
-      opacity: 0, 
-      y: 30,
-      scale: 0.9
-    });
-    
-    gsap.to(elements, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.5,
-      stagger: 0.1,
-      ease: "power2.out"
-    });
-  }
-
-  indicators.forEach(indicator => {
-    indicator.addEventListener('click', () => {
-      const index = parseInt(indicator.getAttribute('data-index'));
-      goToSlide(index);
-    });
   });
-
-  document.addEventListener('keydown', (e) => {
-    const examplesPage = document.getElementById('examples');
-    if (!examplesPage.classList.contains('active')) return;
-    
-    if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      goToSlide(currentSlide + 1);
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      goToSlide(currentSlide - 1);
-    }
-  });
-
-  let scrollTimeout;
-  uiCarousel.addEventListener('scroll', () => {
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      const scrollLeft = uiCarousel.scrollLeft;
-      const slideWidth = uiCarousel.offsetWidth;
-      const newIndex = Math.round(scrollLeft / slideWidth);
-      
-      if (newIndex !== currentSlide && newIndex >= 0 && newIndex < totalSlides) {
-        currentSlide = newIndex;
-        
-        indicators.forEach((ind, i) => {
-          ind.classList.toggle('active', i === currentSlide);
-        });
-        
-        counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
-      }
-    }, 100);
-  });
-
-  goToSlide(0);
   
   console.log('Portfolio initialized successfully!');
 });

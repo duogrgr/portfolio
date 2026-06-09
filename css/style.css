@@ -282,8 +282,7 @@ a:hover {
 }
 
 .amb-instruction,
-.ui-instruction,
-.slide-instruction {
+.section-instruction {
   margin-bottom: 2rem;
   color: var(--accent-color);
   opacity: 0.9;
@@ -317,46 +316,19 @@ a:hover {
   background-color: rgba(255, 107, 91, 0.2);
 }
 
-/* ===== UI КАРУСЕЛЬ ===== */
-.ui-carousel-wrapper {
-  position: relative;
-  margin-top: 2rem;
-}
-
-.ui-carousel {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.ui-carousel::-webkit-scrollbar {
-  display: none;
-}
-
-.ui-slide {
-  flex: 0 0 100%;
-  scroll-snap-align: start;
+/* ===== UI СЕКЦИИ (НЕЗАВИСИМЫЕ БЛОКИ) ===== */
+.ui-section {
   border: 2px solid var(--border-color);
+  margin-bottom: 2rem;
   padding: 2rem;
-  margin-right: 2rem;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
+  position: relative;
 }
 
-.ui-slide:last-child {
-  margin-right: 0;
-}
-
-.slide-header {
+.section-header {
   margin-bottom: 2rem;
 }
 
-.slide-header h3 {
+.section-header h3 {
   font-size: 1.5rem;
   color: var(--accent-color);
   text-transform: uppercase;
@@ -364,44 +336,31 @@ a:hover {
   margin-bottom: 0.5rem;
 }
 
-.slide-content {
-  flex: 1;
+.section-carousel {
   display: flex;
-  gap: 3rem;
-  justify-content: center;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  min-height: 200px;
+}
+
+.section-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  display: flex;
   align-items: center;
-  flex-wrap: wrap;
-}
-
-/* Индикаторы */
-.carousel-indicators {
-  display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 2rem;
+  min-height: 200px;
 }
 
-.indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: var(--bg-color);
-  border: 2px solid var(--accent-color);
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-  padding: 0;
-}
-
-.indicator:hover {
-  transform: scale(1.2);
-}
-
-.indicator.active {
-  background-color: var(--accent-color);
-}
-
-/* Счетчик */
-.carousel-counter {
+.section-counter {
   position: absolute;
   top: 2rem;
   right: 2rem;
@@ -542,10 +501,6 @@ input:checked + .slider .switch-text.off {
   box-shadow: 0 0 15px rgba(255, 107, 91, 0.4);
 }
 
-.progress-bar-container.animating {
-  cursor: default;
-}
-
 .progress-bar-fill {
   position: absolute;
   top: 0;
@@ -679,16 +634,7 @@ input:checked + .slider .switch-text.off {
     font-size: 1.5rem;
   }
   
-  .ui-slide {
-    margin-right: 1rem;
-    padding: 1.5rem;
-  }
-  
-  .slide-content {
-    gap: 2rem;
-  }
-  
-  .carousel-counter {
+  .section-counter {
     top: 1rem;
     right: 1rem;
   }

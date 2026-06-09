@@ -76,21 +76,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // ===== PROGRESS BAR (АВТОЗАПОЛНЕНИЕ) =====
+  // ===== PROGRESS BAR (ПЕРЕЗАПУСК ПРИ КЛИКЕ) =====
   const progressBar = document.getElementById('progressBar');
   const progressBarFill = document.getElementById('progressBarFill');
   const progressBarText = document.getElementById('progressBarText');
 
   if (progressBar && progressBarFill && progressBarText) {
-    let isAnimating = false;
     let animationFrameId = null;
 
     function animateProgress(duration) {
-      if (isAnimating) return;
-      
-      isAnimating = true;
-      progressBar.classList.add('animating');
-      
+      // Сбрасываем к 0%
       progressBarFill.style.width = '0%';
       progressBarText.textContent = '0%';
       
@@ -107,12 +102,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (progress < 1) {
           animationFrameId = requestAnimationFrame(update);
         } else {
-          isAnimating = false;
-          progressBar.classList.remove('animating');
           console.log('Progress bar animation complete');
         }
       }
       
+      // Отменяем предыдущую анимацию (если была)
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
+      // Запускаем новую анимацию
       animationFrameId = requestAnimationFrame(update);
     }
 
@@ -124,10 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const duration = parseInt(progressBar.getAttribute('data-duration')) || 3000;
       
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      
+      // Запускаем анимацию (она сама отменит предыдущую)
       animateProgress(duration);
     });
   }

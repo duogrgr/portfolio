@@ -7,20 +7,17 @@ class AudioEngine {
     this.ambGain = null;
     this.uiSounds = {};
     this.isInitialized = false;
-    this.loadPromises = []; // Храним промисы загрузки
+    this.loadPromises = [];
   }
 
-  // Инициализация с защитой для мобильных
   async init() {
     if (this.isInitialized && this.audioContext.state === 'running') return;
 
     try {
-      // Создаем или возобновляем контекст
       if (!this.audioContext) {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
       }
       
-      // КРИТИЧНО ДЛЯ МОБИЛОК: принудительно resume
       if (this.audioContext.state !== 'running') {
         await this.audioContext.resume();
       }
@@ -28,7 +25,6 @@ class AudioEngine {
       this.isInitialized = true;
       console.log('AudioContext initialized/resumed');
       
-      // Загружаем звуки параллельно
       this.loadAmb();
       this.loadUISounds();
     } catch (error) {
@@ -37,7 +33,7 @@ class AudioEngine {
   }
 
   async loadAmb() {
-    if (this.ambBuffer) return; // Уже загружен
+    if (this.ambBuffer) return;
     try {
       const response = await fetch('audio/amb/loop.ogg');
       const arrayBuffer = await response.arrayBuffer();
@@ -56,7 +52,7 @@ class AudioEngine {
     };
 
     for (const [name, url] of Object.entries(soundFiles)) {
-      if (this.uiSounds[name]) continue; // Уже загружен
+      if (this.uiSounds[name]) continue;
       try {
         const response = await fetch(url);
         const arrayBuffer = await response.arrayBuffer();
@@ -130,7 +126,6 @@ class AudioEngine {
 const audioEngine = new AudioEngine();
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Глобальный обработчик первого касания для разблокировки аудио
   const unlockAudio = () => {
     audioEngine.init();
     document.removeEventListener('touchstart', unlockAudio);
@@ -140,11 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('touchstart', unlockAudio, { once: true });
   document.addEventListener('click', unlockAudio, { once: true });
 
-  // ===== AMB БЛОК =====
   const ambZone = document.getElementById('ambZone');
   
   if (ambZone) {
-    // Mouse события
     ambZone.addEventListener('mousedown', (e) => {
       e.preventDefault();
       audioEngine.init().then(() => audioEngine.startAmb());
@@ -158,9 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
       audioEngine.stopAmb();
     });
 
-    // Touch события
     ambZone.addEventListener('touchstart', (e) => {
-      e.preventDefault(); // Предотвращаем скролл и зум
+      e.preventDefault();
       audioEngine.init().then(() => audioEngine.startAmb());
     }, { passive: false });
 
@@ -175,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ===== UI ЗВУКИ =====
   const uiTriggers = document.querySelectorAll('.ui-sound-trigger');
   
   uiTriggers.forEach(trigger => {
@@ -188,13 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
     
-    // Для тач-устройств добавляем touchstart
     trigger.addEventListener('touchstart', (e) => {
       e.preventDefault();
       audioEngine.init().then(() => {
         const soundName = trigger.getAttribute('data-sound');
         if (soundName) audioEngine.playUI(soundName);
-        // Триггерим клик для визуальной обратной связи
         trigger.click(); 
       });
     }, { passive: false });

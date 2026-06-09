@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let animationFrameId = null;
 
     function animateProgress(duration) {
-      // Сбрасываем к 0%
       progressBarFill.style.width = '0%';
       progressBarText.textContent = '0%';
       
@@ -106,12 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
       
-      // Отменяем предыдущую анимацию (если была)
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
       
-      // Запускаем новую анимацию
       animationFrameId = requestAnimationFrame(update);
     }
 
@@ -122,11 +119,107 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       const duration = parseInt(progressBar.getAttribute('data-duration')) || 3000;
-      
-      // Запускаем анимацию (она сама отменит предыдущую)
       animateProgress(duration);
     });
   }
+  
+  // ===== UI КАРУСЕЛЬ С GSAP =====
+  const uiCarousel = document.getElementById('uiCarousel');
+  const indicators = document.querySelectorAll('.indicator');
+  const counter = document.getElementById('carouselCounter');
+  const totalSlides = document.querySelectorAll('.ui-slide').length;
+  let currentSlide = 0;
+  let isAnimating = false;
+
+  function goToSlide(index) {
+    if (isAnimating) return;
+    isAnimating = true;
+    
+    if (index < 0) index = totalSlides - 1;
+    if (index >= totalSlides) index = 0;
+    
+    currentSlide = index;
+    
+    const slide = document.querySelector(`[data-slide="${index}"]`);
+    if (slide) {
+      slide.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    }
+    
+    indicators.forEach((ind, i) => {
+      ind.classList.toggle('active', i === index);
+    });
+    
+    counter.textContent = `${index + 1} / ${totalSlides}`;
+    
+    animateSlideContent(slide);
+    
+    setTimeout(() => {
+      isAnimating = false;
+    }, 500);
+  }
+
+  function animateSlideContent(slide) {
+    if (!slide || typeof gsap === 'undefined') return;
+    
+    const elements = slide.querySelectorAll('.ui-element');
+    
+    gsap.set(elements, { 
+      opacity: 0, 
+      y: 30,
+      scale: 0.9
+    });
+    
+    gsap.to(elements, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.5,
+      stagger: 0.1,
+      ease: "power2.out"
+    });
+  }
+
+  indicators.forEach(indicator => {
+    indicator.addEventListener('click', () => {
+      const index = parseInt(indicator.getAttribute('data-index'));
+      goToSlide(index);
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const examplesPage = document.getElementById('examples');
+    if (!examplesPage.classList.contains('active')) return;
+    
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      goToSlide(currentSlide + 1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goToSlide(currentSlide - 1);
+    }
+  });
+
+  let scrollTimeout;
+  uiCarousel.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const scrollLeft = uiCarousel.scrollLeft;
+      const slideWidth = uiCarousel.offsetWidth;
+      const newIndex = Math.round(scrollLeft / slideWidth);
+      
+      if (newIndex !== currentSlide && newIndex >= 0 && newIndex < totalSlides) {
+        currentSlide = newIndex;
+        
+        indicators.forEach((ind, i) => {
+          ind.classList.toggle('active', i === currentSlide);
+        });
+        
+        counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      }
+    }, 100);
+  });
+
+  goToSlide(0);
   
   console.log('Portfolio initialized successfully!');
 });

@@ -639,22 +639,26 @@ input:checked + .slider .switch-text.off {
     right: 1rem;
   }
   /* ===== MOUSETRAIL PARTICLES ===== */
-/* ===== MOUSETRAIL PARTICLES ===== */
+/* ===== CURSOR TRAIL ===== */
 #ambZone {
   position: relative;
   overflow: hidden;
   cursor: crosshair;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
-.trail-particle {
+.trail-element {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  pointer-events: none;
-  will-change: transform, opacity, width, height;
-  z-index: 10;
-  border-radius: 50%;
+  width: 30px;
+  height: 30px;
   background-color: var(--accent-color);
-  box-shadow: 0 0 15px rgba(255, 107, 91, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255, 107, 91, 0.6);
+  pointer-events: none;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  z-index: 10;
+  opacity: 0.8;
 }
 }

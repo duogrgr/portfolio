@@ -148,7 +148,7 @@ a:hover {
   opacity: 0.8;
 }
 
-/* ===== PROJECTS (ИНВЕРСИЯ) ===== */
+/* ===== PROJECTS ===== */
 #projects {
   background-color: var(--accent-color);
   color: var(--bg-color);
@@ -308,15 +308,19 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: crosshair;
   transition: background-color 0.3s;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 .amb-zone:hover {
   background-color: rgba(255, 107, 91, 0.2);
 }
 
-/* ===== UI СЕКЦИИ (НЕЗАВИСИМЫЕ БЛОКИ) ===== */
+/* ===== UI СЕКЦИИ ===== */
 .ui-section {
   border: 2px solid var(--border-color);
   margin-bottom: 2rem;
@@ -369,7 +373,6 @@ a:hover {
   font-weight: 700;
 }
 
-/* UI элементы внутри слайдов */
 .ui-element {
   display: flex;
   flex-direction: column;
@@ -606,6 +609,21 @@ input:checked + .slider .switch-text.off {
   border: none;
 }
 
+/* ===== CURSOR TRAIL ===== */
+.trail-element {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255, 107, 91, 0.6);
+  pointer-events: none;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  z-index: 10;
+  opacity: 0.8;
+}
+
 /* ===== АДАПТИВ ===== */
 @media (max-width: 768px) {
   .nav-container {
@@ -638,27 +656,4 @@ input:checked + .slider .switch-text.off {
     top: 1rem;
     right: 1rem;
   }
-  /* ===== MOUSETRAIL PARTICLES ===== */
-/* ===== CURSOR TRAIL ===== */
-#ambZone {
-  position: relative;
-  overflow: hidden;
-  cursor: crosshair;
-  transform-style: preserve-3d;
-  perspective: 1000px;
-}
-
-.trail-element {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: var(--accent-color);
-  border-radius: 50%;
-  box-shadow: 0 0 20px rgba(255, 107, 91, 0.6);
-  pointer-events: none;
-  transform-style: preserve-3d;
-  will-change: transform, opacity;
-  z-index: 10;
-  opacity: 0.8;
-}
 }

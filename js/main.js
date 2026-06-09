@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
   uiSections.forEach(section => {
     const carousel = section.querySelector('.section-carousel');
     const counter = section.querySelector('.section-counter');
-    const sectionId = section.getAttribute('data-section');
     const slides = carousel.querySelectorAll('.carousel-slide');
     const totalSlides = slides.length;
     let currentSlide = 0;
@@ -173,148 +172,135 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
-  // ===== CURSOR TRAIL ДЛЯ AMB СЕКЦИИ =====
+  // ===== CURSOR TRAIL ДЛЯ AMB СЕКЦИИ (ИСПРАВЛЕННЫЙ) =====
   const ambZone = document.getElementById('ambZone');
   
   if (ambZone && typeof gsap !== 'undefined') {
     const TRAIL_COUNT = 20;
-    const FLY_THRESHOLD = 50; // Порог "вылета" в пикселях
-    const GAP_TIME = 250; // Gap в миллисекундах
-    
+    const FLY_THRESHOLD = 50;
+    const GAP_TIME = 250;
+
     let mouseX = 0;
     let mouseY = 0;
     let lastFlyTime = 0;
-    
-    // Создаем элементы трейла
+
     const trailElements = [];
     const positions = [];
-    
+    const isFlying = []; // Состояние "вылета" для каждого элемента
+
+    // Инициализация элементов
     for (let i = 0; i < TRAIL_COUNT; i++) {
       const el = document.createElement('div');
       el.className = 'trail-element';
       ambZone.appendChild(el);
       trailElements.push(el);
       positions.push({ x: 0, y: 0 });
+      isFlying.push(false);
     }
-    
-    // Отслеживаем позицию мыши
+
+    // Отслеживание мыши
     ambZone.addEventListener('mousemove', (e) => {
       const rect = ambZone.getBoundingClientRect();
       mouseX = e.clientX - rect.left;
       mouseY = e.clientY - rect.top;
-      
-      if (typeof audioEngine !== 'undefined') {
-        audioEngine.init();
-      }
+      if (typeof audioEngine !== 'undefined') audioEngine.init();
     });
-    
-    // Touch поддержка
+
+    // Отслеживание тача
     ambZone.addEventListener('touchmove', (e) => {
       e.preventDefault();
       const rect = ambZone.getBoundingClientRect();
-      const touch = e.touches[0];
-      mouseX = touch.clientX - rect.left;
-      mouseY = touch.clientY - rect.top;
-      
-      if (typeof audioEngine !== 'undefined') {
-        audioEngine.init();
-      }
+      mouseX = e.touches[0].clientX - rect.left;
+      mouseY = e.touches[0].clientY - rect.top;
+      if (typeof audioEngine !== 'undefined') audioEngine.init();
     }, { passive: false });
-    
+
     // Функция "вылета" элемента
     function triggerFlyOut(index) {
       const el = trailElements[index];
       const currentTime = Date.now();
-      
-      // Проверяем gap
+
+      // Проверка gap
       if (currentTime - lastFlyTime < GAP_TIME) return;
-      
+
       lastFlyTime = currentTime;
-      
-      // Анимация падения вниз + fade out
+      isFlying[index] = true; // Блокируем обновление позиции в цикле
+
+      // Анимация падения вниз + 3D вращение + исчезновение
       gsap.to(el, {
-        y: '+=100',
+        y: '+=120',
         opacity: 0,
-        duration: 0.5,
+        rotationX: Math.random() * 360,
+        rotationY: Math.random() * 360,
+        duration: 0.6,
         ease: "power2.in",
         onComplete: () => {
-          // Сбрасываем позицию и прозрачность
-          gsap.set(el, {
-            x: positions[index].x,
-            y: positions[index].y,
-            opacity: 1,
-            rotationX: 0,
-            rotationY: 0,
-            rotationZ: 0
+          isFlying[index] = false; // Разблокируем элемент
+          // Мгновенно возвращаем на текущую расчетную позицию и сбрасываем прозрачность/вращение
+          gsap.set(el, { 
+            opacity: 1, 
+            rotationX: 0, 
+            rotationY: 0, 
+            rotationZ: 0 
           });
         }
       });
-      
+
       // Играем следующий звук
       if (typeof audioEngine !== 'undefined') {
         audioEngine.playNextTrigger();
       }
     }
-    
+
     // Главный цикл анимации
     function animate() {
       const currentTime = Date.now();
-      
-      // Первый элемент следует за курсором
-      const dx0 = mouseX - positions[0].x;
-      const dy0 = mouseY - positions[0].y;
-      const dist0 = Math.hypot(dx0, dy0);
-      
-      // Плавное движение к цели
-      positions[0].x += dx0 * 0.3;
-      positions[0].y += dy0 * 0.3;
-      
-      // Проверяем "вылет" для первого элемента
-      if (dist0 > FLY_THRESHOLD && currentTime - lastFlyTime >= GAP_TIME) {
-        triggerFlyOut(0);
-      }
-      
-      // Остальные элементы следуют за предыдущими
-      for (let i = 1; i < TRAIL_COUNT; i++) {
-        const dx = positions[i - 1].x - positions[i].x;
-        const dy = positions[i - 1].y - positions[i].y;
-        const dist = Math.hypot(dx, dy);
-        
-        // Плавное движение
-        positions[i].x += dx * 0.3;
-        positions[i].y += dy * 0.3;
-        
-        // Проверяем "вылет"
-        if (dist > FLY_THRESHOLD && currentTime - lastFlyTime >= GAP_TIME) {
-          triggerFlyOut(i);
+
+      // 1. Первый элемент следует за курсором
+      if (!isFlying[0]) {
+        positions[0].x += (mouseX - positions[0].x) * 0.25;
+        positions[0].y += (mouseY - positions[0].y) * 0.25;
+
+        const dist0 = Math.hypot(mouseX - positions[0].x, mouseY - positions[0].y);
+        if (dist0 > FLY_THRESHOLD && currentTime - lastFlyTime >= GAP_TIME) {
+          triggerFlyOut(0);
         }
-        
-        // Применяем позицию и 3D вращение
-        const el = trailElements[i];
-        const rotationX = positions[i].y * 0.5;
-        const rotationY = positions[i].x * 0.5;
-        
-        gsap.set(el, {
-          x: positions[i].x,
-          y: positions[i].y,
-          rotationX: rotationX,
-          rotationY: rotationY,
-          rotationZ: i * 18
+
+        gsap.set(trailElements[0], {
+          x: positions[0].x,
+          y: positions[0].y,
+          rotationX: positions[0].y * 0.3,
+          rotationY: positions[0].x * 0.3,
+          rotationZ: 0
         });
       }
-      
-      // Применяем позицию для первого элемента
-      gsap.set(trailElements[0], {
-        x: positions[0].x,
-        y: positions[0].y,
-        rotationX: positions[0].y * 0.5,
-        rotationY: positions[0].x * 0.5
-      });
-      
+
+      // 2. Остальные элементы следуют за предыдущими
+      for (let i = 1; i < TRAIL_COUNT; i++) {
+        if (!isFlying[i]) {
+          const prev = positions[i - 1];
+          positions[i].x += (prev.x - positions[i].x) * 0.2;
+          positions[i].y += (prev.y - positions[i].y) * 0.2;
+
+          const dist = Math.hypot(prev.x - positions[i].x, prev.y - positions[i].y);
+          if (dist > FLY_THRESHOLD && currentTime - lastFlyTime >= GAP_TIME) {
+            triggerFlyOut(i);
+          }
+
+          gsap.set(trailElements[i], {
+            x: positions[i].x,
+            y: positions[i].y,
+            rotationX: positions[i].y * 0.3,
+            rotationY: positions[i].x * 0.3,
+            rotationZ: i * 18
+          });
+        }
+      }
+
       requestAnimationFrame(animate);
     }
-    
-    // Запускаем анимацию
+
+    // Запуск цикла
     animate();
   }
   

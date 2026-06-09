@@ -176,6 +176,84 @@ document.addEventListener('DOMContentLoaded', () => {
       animateProgress(duration);
     });
   });
+    // ===== MOUSETRAIL ДЛЯ AMB СЕКЦИИ =====
+  const ambZone = document.getElementById('ambZone');
   
+  if (ambZone && typeof gsap !== 'undefined') {
+    let lastX = 0;
+    let lastY = 0;
+    let lastTime = 0;
+    
+    const MIN_DISTANCE = 25; // Минимальное расстояние в пикселях
+    const MIN_TIME = 100;    // Минимальное время в мс
+    
+    const shapes = ['shape-circle', 'shape-square', 'shape-triangle'];
+
+    function createParticle(x, y) {
+      const particle = document.createElement('div');
+      const shape = shapes[Math.floor(Math.random() * shapes.length)];
+      
+      particle.className = `trail-particle ${shape}`;
+      particle.style.left = `${x}px`;
+      particle.style.top = `${y}px`;
+      
+      ambZone.appendChild(particle);
+
+      // 3D-анимация GSAP
+      gsap.to(particle, {
+        x: (Math.random() - 0.5) * 150,
+        y: (Math.random() - 0.5) * 150,
+        z: (Math.random() - 0.5) * 300,
+        rotationX: Math.random() * 360,
+        rotationY: Math.random() * 360,
+        rotationZ: Math.random() * 180,
+        opacity: 0,
+        scale: 0,
+        duration: 1 + Math.random() * 0.5,
+        ease: "power2.out",
+        onComplete: () => particle.remove()
+      });
+
+      // Играем следующий звук из 8 триггеров
+      if (typeof audioEngine !== 'undefined') {
+        audioEngine.playNextTrigger();
+      }
+    }
+
+    function handleMove(clientX, clientY) {
+      const rect = ambZone.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const currentTime = Date.now();
+
+      // Проверка границ (чтобы частицы не вылетали за пределы блока)
+      if (x < 0 || x > rect.width || y < 0 || y > rect.height) return;
+
+      const distance = Math.hypot(x - lastX, y - lastY);
+      const timeGap = currentTime - lastTime;
+
+      // GAP-логика: создаем частицу только если прошли достаточно далеко и прошло достаточно времени
+      if (distance > MIN_DISTANCE && timeGap > MIN_TIME) {
+        createParticle(x, y);
+        lastX = x;
+        lastY = y;
+        lastTime = currentTime;
+      }
+    }
+
+    // Mouse events
+    ambZone.addEventListener('mousemove', (e) => {
+      // Работает только если зажата мышь (как в оригинальном AMB) или всегда? 
+      // Давай сделаем всегда при наведении, это эффект трейла.
+      handleMove(e.clientX, e.clientY);
+    });
+
+    // Touch events
+    ambZone.addEventListener('touchmove', (e) => {
+      e.preventDefault(); // Блокируем скролл внутри зоны
+      const touch = e.touches[0];
+      handleMove(touch.clientX, touch.clientY);
+    }, { passive: false });
+  }
   console.log('Portfolio initialized successfully!');
 });

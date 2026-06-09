@@ -1,4 +1,4 @@
-// ===== ЗВУКОВОЙ ДВИЖОК (МОБИЛЬНАЯ ВЕРСИЯ) =====
+// ===== ЗВУКОВОЙ ДВИЖОК =====
 class AudioEngine {
   constructor() {
     this.audioContext = null;
@@ -6,8 +6,9 @@ class AudioEngine {
     this.ambBuffer = null;
     this.ambGain = null;
     this.uiSounds = {};
+    this.triggers = []; // Массив для 8 триггеров
+    this.triggerIndex = 0; // Счетчик для последовательного воспроизведения
     this.isInitialized = false;
-    this.loadPromises = [];
   }
 
   async init() {
@@ -27,6 +28,7 @@ class AudioEngine {
       
       this.loadAmb();
       this.loadUISounds();
+      this.loadTriggers(); // Загружаем триггеры
     } catch (error) {
       console.error('Failed to initialize AudioContext:', error);
     }
@@ -57,18 +59,50 @@ class AudioEngine {
         const response = await fetch(url);
         const arrayBuffer = await response.arrayBuffer();
         this.uiSounds[name] = await this.audioContext.decodeAudioData(arrayBuffer);
-        console.log(`UI sound "${name}" loaded`);
       } catch (error) {
         console.error(`Failed to load UI sound "${name}":`, error);
       }
     }
   }
 
-  startAmb() {
-    if (!this.ambBuffer || !this.audioContext) {
-      console.warn('AMB buffer not ready yet');
-      return;
+  // Загрузка 8 триггеров
+  async loadTriggers() {
+    if (this.triggers.length > 0) return; // Уже загружены
+    
+    for (let i = 1; i <= 8; i++) {
+      try {
+        const response = await fetch(`audio/amb/trigger${i}.ogg`);
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        this.triggers.push(buffer);
+      } catch (error) {
+        console.error(`Failed to load trigger${i}.ogg:`, error);
+      }
     }
+    console.log('8 AMB triggers loaded');
+  }
+
+  // Воспроизведение следующего триггера по кругу
+  playNextTrigger() {
+    if (this.triggers.length === 0 || !this.audioContext) return;
+
+    const buffer = this.triggers[this.triggerIndex];
+    const source = this.audioContext.createBufferSource();
+    source.buffer = buffer;
+
+    const gain = this.audioContext.createGain();
+    gain.gain.setValueAtTime(0.6, this.audioContext.currentTime); // Чуть тише, чтобы не оглушить
+
+    source.connect(gain);
+    gain.connect(this.audioContext.destination);
+    source.start(0);
+
+    // Переходим к следующему, зацикливаем на 8
+    this.triggerIndex = (this.triggerIndex + 1) % 8;
+  }
+
+  startAmb() {
+    if (!this.ambBuffer || !this.audioContext) return;
     if (this.ambSource) return;
 
     this.ambSource = this.audioContext.createBufferSource();
@@ -83,7 +117,6 @@ class AudioEngine {
     this.ambGain.connect(this.audioContext.destination);
 
     this.ambSource.start(0);
-    console.log('AMB started');
   }
 
   stopAmb() {
@@ -98,16 +131,12 @@ class AudioEngine {
         this.ambSource.disconnect();
         this.ambSource = null;
         this.ambGain = null;
-        console.log('AMB stopped');
       }
     }, 300);
   }
 
   playUI(soundName) {
-    if (!this.uiSounds[soundName] || !this.audioContext) {
-      console.warn(`UI sound "${soundName}" not ready`);
-      return;
-    }
+    if (!this.uiSounds[soundName] || !this.audioContext) return;
 
     const source = this.audioContext.createBufferSource();
     source.buffer = this.uiSounds[soundName];
@@ -117,9 +146,7 @@ class AudioEngine {
 
     source.connect(gain);
     gain.connect(this.audioContext.destination);
-
     source.start(0);
-    console.log(`UI sound "${soundName}" played`);
   }
 }
 
@@ -138,29 +165,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const ambZone = document.getElementById('ambZone');
   
   if (ambZone) {
+    // Мышь
     ambZone.addEventListener('mousedown', (e) => {
       e.preventDefault();
       audioEngine.init().then(() => audioEngine.startAmb());
     });
+    ambZone.addEventListener('mouseup', () => audioEngine.stopAmb());
+    ambZone.addEventListener('mouseleave', () => audioEngine.stopAmb());
 
-    ambZone.addEventListener('mouseup', () => {
-      audioEngine.stopAmb();
-    });
-
-    ambZone.addEventListener('mouseleave', () => {
-      audioEngine.stopAmb();
-    });
-
+    // Тач
     ambZone.addEventListener('touchstart', (e) => {
       e.preventDefault();
       audioEngine.init().then(() => audioEngine.startAmb());
     }, { passive: false });
-
     ambZone.addEventListener('touchend', (e) => {
       e.preventDefault();
       audioEngine.stopAmb();
     });
-
     ambZone.addEventListener('touchcancel', (e) => {
       e.preventDefault();
       audioEngine.stopAmb();
@@ -168,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const uiTriggers = document.querySelectorAll('.ui-sound-trigger');
-  
   uiTriggers.forEach(trigger => {
     if (trigger.type === 'range') return;
 
@@ -188,6 +208,4 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }, { passive: false });
   });
-
-  console.log('Audio engine ready');
 });

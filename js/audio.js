@@ -2,9 +2,6 @@
 class AudioEngine {
   constructor() {
     this.audioContext = null;
-    this.ambSource = null;
-    this.ambBuffer = null;
-    this.ambGain = null;
     this.uiSounds = {};
     this.triggers = [];
     this.triggerIndex = 0;

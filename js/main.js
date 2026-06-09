@@ -87,12 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalSlides = slides.length;
     let currentSlide = 0;
     
-    // Функция обновления счетчика
     function updateCounter(index) {
       counter.textContent = `${index + 1} / ${totalSlides}`;
     }
     
-    // Отслеживание скролла для обновления счетчика
     let scrollTimeout;
     carousel.addEventListener('scroll', () => {
       clearTimeout(scrollTimeout);
@@ -108,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 100);
     });
     
-    // Клавиатурная навигация для активного блока
     carousel.setAttribute('tabindex', '0');
     carousel.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight') {
@@ -128,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     
-    // Инициализация
     updateCounter(0);
   });
   
@@ -176,43 +172,46 @@ document.addEventListener('DOMContentLoaded', () => {
       animateProgress(duration);
     });
   });
-    // ===== MOUSETRAIL ДЛЯ AMB СЕКЦИИ =====
+  
+  // ===== MOUSETRAIL ДЛЯ AMB СЕКЦИИ =====
   const ambZone = document.getElementById('ambZone');
   
   if (ambZone && typeof gsap !== 'undefined') {
     let lastX = 0;
     let lastY = 0;
     let lastTime = 0;
+    let isFirstMove = true;
     
-    const MIN_DISTANCE = 25; // Минимальное расстояние в пикселях
-    const MIN_TIME = 100;    // Минимальное время в мс
-    
-    const shapes = ['shape-circle', 'shape-square', 'shape-triangle'];
+    const MIN_DISTANCE = 10; // Уменьшили, так как gap большой
+    const MIN_TIME = 500;    // Увеличили до 500ms (0.5s)
 
     function createParticle(x, y) {
       const particle = document.createElement('div');
-      const shape = shapes[Math.floor(Math.random() * shapes.length)];
-      
-      particle.className = `trail-particle ${shape}`;
+      particle.className = 'trail-particle shape-circle';
       particle.style.left = `${x}px`;
       particle.style.top = `${y}px`;
+      particle.style.transform = 'translate(-50%, -50%)'; // Центрируем частицу
       
       ambZone.appendChild(particle);
 
-      // 3D-анимация GSAP
-      gsap.to(particle, {
-        x: (Math.random() - 0.5) * 150,
-        y: (Math.random() - 0.5) * 150,
-        z: (Math.random() - 0.5) * 300,
-        rotationX: Math.random() * 360,
-        rotationY: Math.random() * 360,
-        rotationZ: Math.random() * 180,
-        opacity: 0,
-        scale: 0,
-        duration: 1 + Math.random() * 0.5,
-        ease: "power2.out",
-        onComplete: () => particle.remove()
-      });
+      // Анимация: увеличение в размере + затухание
+      gsap.fromTo(particle, 
+        {
+          scale: 0.3,
+          opacity: 1,
+          width: 20,
+          height: 20
+        },
+        {
+          scale: 3,
+          opacity: 0,
+          width: 80,
+          height: 80,
+          duration: 1.2,
+          ease: "power2.out",
+          onComplete: () => particle.remove()
+        }
+      );
 
       // Играем следующий звук из 8 триггеров
       if (typeof audioEngine !== 'undefined') {
@@ -226,13 +225,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const y = clientY - rect.top;
       const currentTime = Date.now();
 
-      // Проверка границ (чтобы частицы не вылетали за пределы блока)
+      // Проверка границ
       if (x < 0 || x > rect.width || y < 0 || y > rect.height) return;
+
+      // Для первого движения не проверяем distance
+      if (isFirstMove) {
+        createParticle(x, y);
+        lastX = x;
+        lastY = y;
+        lastTime = currentTime;
+        isFirstMove = false;
+        return;
+      }
 
       const distance = Math.hypot(x - lastX, y - lastY);
       const timeGap = currentTime - lastTime;
 
-      // GAP-логика: создаем частицу только если прошли достаточно далеко и прошло достаточно времени
+      // GAP-логика: создаем частицу только если прошли достаточно далеко И прошло 500ms
       if (distance > MIN_DISTANCE && timeGap > MIN_TIME) {
         createParticle(x, y);
         lastX = x;
@@ -241,19 +250,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Mouse events
+    // Mouse events - добавляем инициализацию audioEngine
     ambZone.addEventListener('mousemove', (e) => {
-      // Работает только если зажата мышь (как в оригинальном AMB) или всегда? 
-      // Давай сделаем всегда при наведении, это эффект трейла.
+      audioEngine.init(); // Инициализируем при первом движении мыши
       handleMove(e.clientX, e.clientY);
     });
 
     // Touch events
     ambZone.addEventListener('touchmove', (e) => {
-      e.preventDefault(); // Блокируем скролл внутри зоны
+      e.preventDefault();
+      audioEngine.init();
+      const touch = e.touches[0];
+      handleMove(touch.clientX, touch.clientY);
+    }, { passive: false });
+    
+    ambZone.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      audioEngine.init();
       const touch = e.touches[0];
       handleMove(touch.clientX, touch.clientY);
     }, { passive: false });
   }
+  
   console.log('Portfolio initialized successfully!');
 });

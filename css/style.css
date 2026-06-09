@@ -639,43 +639,22 @@ input:checked + .slider .switch-text.off {
     right: 1rem;
   }
   /* ===== MOUSETRAIL PARTICLES ===== */
+/* ===== MOUSETRAIL PARTICLES ===== */
 #ambZone {
   position: relative;
-  overflow: hidden; /* Чтобы частицы не вылетали за блок */
-  transform-style: preserve-3d; /* Включаем 3D-пространство для контейнера */
-  perspective: 1000px; /* Глубина 3D-сцены */
+  overflow: hidden;
+  cursor: crosshair;
 }
 
 .trail-particle {
   position: absolute;
   width: 20px;
   height: 20px;
-  pointer-events: none; /* Чтобы частицы не перехватывали клики */
-  transform-style: preserve-3d;
-  will-change: transform, opacity;
+  pointer-events: none;
+  will-change: transform, opacity, width, height;
   z-index: 10;
-}
-
-/* Формы частиц */
-.shape-circle {
-  background-color: var(--accent-color);
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(255, 107, 91, 0.5);
-}
-
-.shape-square {
   background-color: var(--accent-color);
-  box-shadow: 0 0 10px rgba(255, 107, 91, 0.5);
-}
-
-.shape-triangle {
-  width: 0;
-  height: 0;
-  background-color: transparent !important;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 20px solid var(--accent-color);
-  box-shadow: none;
-  filter: drop-shadow(0 0 5px rgba(255, 107, 91, 0.5));
+  box-shadow: 0 0 15px rgba(255, 107, 91, 0.6);
 }
 }
